@@ -8,6 +8,7 @@
 #include <utility>
 #include <iostream>
 #include <filesystem>
+#include <thread>
 
 namespace tester {
 
@@ -132,6 +133,7 @@ bool TestHarness::runTestsForToolChain(std::string exeName, std::string tcName) 
 
   // Iterate the packages.
   for (const auto &testPackage : tests) {
+    //TODO execute each test package in a seperate thread
     // Print the package name.
     std::cout << "Entering package: " << testPackage.first << '\n';
 
@@ -180,6 +182,7 @@ bool TestHarness::runTestsForToolChain(std::string exeName, std::string tcName) 
 
     std::cout << " Package passed " << packagePasses<< " / " << packageCount << '\n';
   }
+  //TODO report the results of testing in a nicer dashboard (since threading will obscure the failing tests)
 
   std::cout << "Toolchain passed " << toolChainPasses << " / " << toolChainCount << "\n\n";
   return failed;
