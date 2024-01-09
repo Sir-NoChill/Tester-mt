@@ -1,7 +1,10 @@
 #include "testharness/TestHarness.h"
 
+#include "config/Config.h"
+#include "testharness/ResultManager.h"
 #include "tests/TestResult.h"
 
+#include "toolchain/ToolChain.h"
 #include "util.h"
 
 #include <sstream>
@@ -134,6 +137,20 @@ bool TestHarness::runTestsForToolChain(std::string exeName, std::string tcName) 
   // Iterate the packages.
   for (const auto &testPackage : tests) {
     //TODO execute each test package in a seperate thread
+    // each thread will need it's own outstream so that we can keep track of all the failing executions
+
+    //NOTE this is the execution moment
+    std::thread package(testPackage);
+  }
+  //TODO report the results of testing in a nicer dashboard (since threading will obscure the failing tests)
+
+  std::cout << "Toolchain passed " << toolChainPasses << " / " << toolChainCount << "\n\n";
+  return failed;
+}
+
+std::ostream package(TestSet testPackage, ToolChain toolChain, Config cfg) {
+  std::ofstream package_out;
+
     // Print the package name.
     std::cout << "Entering package: " << testPackage.first << '\n';
 
@@ -166,10 +183,10 @@ bool TestHarness::runTestsForToolChain(std::string exeName, std::string tcName) 
         }
         // If we fail, potentially print the diff.
         else {
-	  failed = true;
+          failed = true;
           if (!cfg.isQuiet() && !result.error)
             std::cout << '\n' << result.diff << '\n';
-	}
+        }
       }
 
       std::cout << "  Subpackage passed " << subPackagePasses << " / " << testSet.second.size()
@@ -181,11 +198,7 @@ bool TestHarness::runTestsForToolChain(std::string exeName, std::string tcName) 
     toolChainCount += packageCount;
 
     std::cout << " Package passed " << packagePasses<< " / " << packageCount << '\n';
-  }
-  //TODO report the results of testing in a nicer dashboard (since threading will obscure the failing tests)
 
-  std::cout << "Toolchain passed " << toolChainPasses << " / " << toolChainCount << "\n\n";
-  return failed;
 }
 
 } // End namespace tester
